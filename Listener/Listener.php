@@ -24,13 +24,21 @@ use JMS\DiExtraBundle\Annotation as DI;
 class Listener
 {
     private $container;
+    private $httpKernel;
+    private $request;
     /**
      * @param ContainerInterface $container
-     * @DI\InjectParams({"container"=@DI\Inject("service_container")})
+     * @DI\InjectParams({
+     *  "container"=@DI\Inject("service_container"),
+     *  "requestStack"=@DI\Inject("request_stack"),
+     *  "httpKernel"=@DI\Inject("http_kernel")
+     * })
      */
-    public function __contruct(ContainerInterface $container)
+    public function __contruct(ContainerInterface $container, requestStack $requestStack, HttpKernelInterface $httpKernel)
     {
         $this->container = $container;
+        $this->httpKernel = $httpKernel;
+        $this->request = $requestStack->getCurrentRequest();
     }
     /**
      * @DI\Observe("widget_simusante_user_widget")
@@ -39,9 +47,18 @@ class Listener
      */
     public function onDisplay(DisplayWidgetEvent $event)
     {
-        $twig = $this->container->get('templating');
-        $content = $twig->render('SimusanteUserwidgetBundle::toto.html.twig');
-        $event->setContent($content);
+//        $widgetInstance = $event->getInstance();
+        $params = array();
+        $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:displayUser';
+//        $params['widgetInstance'] = $widgetInstance->getId();
+        $this->redirect($params, $event);
+    }
+
+    private function redirect($params, $event)
+    {
+        $subRequest = $this->request->duplicate(array(), null, $params);
+        $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        $event->setContent($response->getContent());
         $event->stopPropagation();
     }
 }
