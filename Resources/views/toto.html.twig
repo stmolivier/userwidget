@@ -1,1 +1,6 @@
-I AM TOTO 2
+LISTE DES UTILISATEURS
+<ul>
+{% for user in users %}
+    <li>{{ user.firstName }}</li>
+{% endfor %}
+</ul>
