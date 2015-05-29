@@ -1,0 +1,6 @@
+plugin:
+  has_options: false
+
+  widgets:
+     - name: simusante_user_widget
+       is_configurable: true

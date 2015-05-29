@@ -1,0 +1,23 @@
+{
+  "name": "simusante/userwidget-bundle",
+  "description": "Simusante User Widget",
+  "keywords": ["Claroline", "SimUSante", "Widget"],
+  "homepage": "http://www.cpa-simusante.org",
+  "type": "claroline-plugin",
+  "license": "GPL-3.0+",
+  "authors": [
+    {
+      "name": "Dechepy Olivier",
+      "email": "dechepy.olivier@chu-amiens.fr",
+      "homepage": "http://github.com/stmolivier"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.1",
+    "claroline/core-bundle": "~5.0"
+  },
+  "autoload": {
+    "psr-0": { "Simusante\\UserwidgetBundle": "" }
+  },
+  "target-dir": "Simusante/UserwidgetBundle"
+}

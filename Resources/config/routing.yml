@@ -1,0 +1,4 @@
+simusante_userwidget:
+    resource: "@SimusanteUserwidgetBundle/Controller/UserwidgetController.php"
+    type:     annotation
+    prefix:   /
