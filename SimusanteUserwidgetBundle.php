@@ -11,7 +11,7 @@ class SimusanteUserwidgetBundle extends PluginBundle
     {
         return false;
     }
-    
+
     public function getConfiguration($environment)
     {
         $config = new ConfigurationBuilder();
