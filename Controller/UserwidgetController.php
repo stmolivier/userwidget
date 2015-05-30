@@ -48,6 +48,9 @@ class UserwidgetController extends Controller
         $this->wsRepo            = $om->getRepository('ClarolineCoreBundle:Workspace\Workspace');//$om->getRepository(Entity)
     }
 
+    /*
+     * action called by the onDisplay method in the Listener
+     */
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -59,7 +62,9 @@ class UserwidgetController extends Controller
         //Get the list of users with the role $role
         $users = $this->userRepo->findByRoles(array($role));
         */
-        $workspace = $this->wsRepo->findOneByName('ws2');
+        $workspace = $this->wsRepo->findOneByCode('ea1');
+      /*  var_dump($workspace);
+        die();*/
         //Get user array from query
         $users = $this->userRepo->findUsersByWorkspace(array($workspace));
         //template rendering
