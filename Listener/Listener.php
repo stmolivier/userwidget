@@ -12,7 +12,6 @@
 namespace Simusante\UserwidgetBundle\Listener;
 
 use Claroline\CoreBundle\Event\DisplayWidgetEvent;
-use Claroline\CoreBundle\Listener\NoHttpRequestException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,8 +22,17 @@ use JMS\DiExtraBundle\Annotation as DI;
  */
 class Listener
 {
+    /*
+     * Container of the data
+     */
     private $container;
+    /*
+     *
+     */
     private $httpKernel;
+    /*
+     *
+     */
     private $request;
     /**
      * @param ContainerInterface $container
@@ -40,6 +48,9 @@ class Listener
         $this->httpKernel = $httpKernel;
         $this->request = $requestStack->getCurrentRequest();
     }
+    /*
+     * Listener to the widget display
+     */
     /**
      * @DI\Observe("widget_simusante_user_widget")
      *
@@ -56,8 +67,11 @@ class Listener
 
     private function redirect($params, $event)
     {
+        // ???
         $subRequest = $this->request->duplicate(array(), null, $params);
+        //Create a response
         $response = $this->httpKernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        //fill the event with the content
         $event->setContent($response->getContent());
         $event->stopPropagation();
     }

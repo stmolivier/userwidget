@@ -13,9 +13,21 @@ use JMS\DiExtraBundle\Annotation as DI;
  */
 class UserwidgetController extends Controller
 {
+    /*
+     * Object manager
+     */
     private $om;
+    /*
+     * User repository, retrieved from the core, through the OM
+     */
     private $userRepo;
-    private $roleRepo;  //nécessaire pour récupérer le role sous le bon format
+    /*
+     * Role repository, retrieved from the core, through the OM
+     */
+    private $roleRepo;  //necessary to retrieve the role with right format
+    /*
+     * Workspace repository, retrieved from the core, through the OM
+     */
     private $wsRepo;
     /**
      * @DI\InjectParams({
@@ -42,15 +54,15 @@ class UserwidgetController extends Controller
     public function displayUserAction()
     {
         /*
-        //Récupère un objet Role
+        //Get a Role object
         $role = $this->roleRepo->findOneByName('ROLE_WS_CREATOR');
-        //Récupère la liste des utilisateur ayant le role
+        //Get the list of users with the role $role
         $users = $this->userRepo->findByRoles(array($role));
         */
         $workspace = $this->wsRepo->findOneByName('ws2');
-        //Récupère un objet Role
+        //Get user array from query
         $users = $this->userRepo->findUsersByWorkspace(array($workspace));
-
+        //template rendering
         return $this->render('SimusanteUserwidgetBundle::toto.html.twig', array('users'=> $users));
     }
 }
