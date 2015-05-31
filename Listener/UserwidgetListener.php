@@ -18,25 +18,35 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Bundle\TwigBundle\TwigEngine;
 use JMS\DiExtraBundle\Annotation as DI;
+use Symfony\Component\Form\FormFactory;
+use Simusante\UserwidgetBundle\Entity\Config;
+use Simusante\UserwidgetBundle\Form\ConfigType;
 
 /**
  * @DI\Service()
  */
 class UserwidgetListener
 {
-    /*
-     * Container of the data
+    /**
+     * Container of the displayed data
+     * @var
      */
     private $container;
-    /*
-     *
+    /**
+     * @var
      */
     private $httpKernel;
-    /*
-     *
+    /**
+     * @var
      */
     private $request;
-
+    /**
+     * @var
+     */
+    private $formFactory;
+    /**
+     * @var
+     */
     private $templating;
     /**
      * @param ContainerInterface $container
@@ -45,12 +55,14 @@ class UserwidgetListener
      *  "requestStack"=@DI\Inject("request_stack"),
      *  "httpKernel"=@DI\Inject("http_kernel"),
      *  "templating"  = @DI\Inject("templating"),
+     *  "formFactory" = @DI\Inject("form.factory")
      * })
      */
     public function __contruct(
         ContainerInterface $container,
         requestStack $requestStack,
         HttpKernelInterface $httpKernel,
+        FormFactory $formFactory,
         TwigEngine $templating
     )
     {
@@ -58,6 +70,7 @@ class UserwidgetListener
         $this->httpKernel = $httpKernel;
         $this->request = $requestStack->getCurrentRequest();
         $this->templating = $templating;
+        $this->formFactory = $formFactory;
     }
     /*
      * Listener to the widget display
@@ -89,7 +102,7 @@ class UserwidgetListener
         $event->stopPropagation();
     }
 
-    /*
+    /**
      * Widget configuration
      */
     /**
@@ -97,29 +110,24 @@ class UserwidgetListener
      */
     public function onConfigure(ConfigureWidgetEvent $event)
     {
-        //get an instance of the event object
+        //retrieve the instance of the event
         $instance = $event->getInstance();
         //
        // $config = $this->rssManager->getConfig($instance);
 
-       /* if ($config === null) {
+        $config = null;
+        if ($config === null) {
             $config = new Config();
         }
-
+        //Set the config form
         $form = $this->formFactory->create(new ConfigType, $config);
 
         $content = $this->templating->render(
-            'SimusanteUserwidgetBundle:Userwidget:widgetformconfiguration.html.twig',
+            'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
             array(
                 'form' => $form->createView(),
                 'isAdmin' => $instance->isAdmin(),
                 'config' => $instance
-            )
-        );*/
-        $content = $this->templating->render(
-            'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
-            array(
-
             )
         );
         $event->setContent($content);

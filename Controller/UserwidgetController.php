@@ -5,7 +5,11 @@ namespace Simusante\UserwidgetBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Claroline\CoreBundle\Persistence\ObjectManager;
+use Simusante\UserwidgetBundle\Form\ConfigType;
+use Simusante\UserwidgetBundle\Entity\Config;
+use Claroline\CoreBundle\Entity\Widget\WidgetInstance;
 use JMS\DiExtraBundle\Annotation as DI;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * userwidget controller.
@@ -69,5 +73,62 @@ class UserwidgetController extends Controller
         $users = $this->userRepo->findUsersByWorkspace(array($workspace));
         //template rendering
         return $this->render('SimusanteUserwidgetBundle::toto.html.twig', array('users'=> $users));
+    }
+
+    /*
+     * action called by the onConfigure method in the Listener for form POST
+     */
+    /**
+     * @EXT\Route(
+     *     "/simple_text_update/config/{widget}",
+     *     name="simusante_userwidget_config_update"
+     * )
+     * @EXT\Method("POST")
+     */
+    public function configureUserwidget(WidgetInstance $widget)
+    {
+        if (!$this->get('security.authorization_checker')->isGranted('edit', $widget)) {
+            throw new AccessDeniedException();
+        }
+/*
+        $rssConfig = $this->get('claroline.manager.rss_manager')->getConfig($widget);
+        $form = $this->container->get('form.factory')->create(new ConfigType, new Config());
+        $form->bind($this->getRequest());
+
+        if ($rssConfig) {
+            if ($form->isValid()) {
+                $rssConfig->setUrl($form->get('url')->getData());
+            } else {
+                return $this->render(
+                    'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
+                    array(
+                        'form' => $form->createView(),
+                        'isAdmin' => $widget->isAdmin(),
+                        'config' => $widget
+                    )
+                );
+            }
+        } else {
+            if ($form->isValid()) {
+                $rssConfig = new Config();
+                $rssConfig->setWidgetInstance($widget);
+                $rssConfig->setUrl($form->get('url')->getData());
+            } else {
+                return $this->render(
+                    'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
+                    array(
+                        'form' => $form->createView(),
+                        'isAdmin' => $widget->isAdmin(),
+                        'config' => $widget
+                    )
+                );
+            }
+        }
+
+        $em = $this->get('doctrine.orm.entity_manager');
+        $em->persist($rssConfig);
+        $em->flush();
+*/
+        return new Response('', 204);
     }
 }
