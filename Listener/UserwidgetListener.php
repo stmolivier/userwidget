@@ -21,6 +21,7 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Symfony\Component\Form\FormFactory;
 use Simusante\UserwidgetBundle\Entity\Config;
 use Simusante\UserwidgetBundle\Form\ConfigType;
+use Simusante\UserwidgetBundle\Library\UserwidgetManager;
 
 /**
  * @DI\Service()
@@ -49,11 +50,17 @@ class UserwidgetListener
      */
     private $templating;
     /**
+     * manager for the widget
+     * @var
+     */
+    private $userwidgetManager;
+    /**
      * @param ContainerInterface $container
      * @DI\InjectParams({
-     *  "container"=@DI\Inject("service_container"),
-     *  "requestStack"=@DI\Inject("request_stack"),
-     *  "httpKernel"=@DI\Inject("http_kernel"),
+     *  "userwidgetManager"  = @DI\Inject("simusante.manager.user_widget"),
+     *  "container"= @DI\Inject("service_container"),
+     *  "requestStack"= @DI\Inject("request_stack"),
+     *  "httpKernel"= @DI\Inject("http_kernel"),
      *  "templating"  = @DI\Inject("templating"),
      *  "formFactory" = @DI\Inject("form.factory")
      * })
@@ -63,7 +70,8 @@ class UserwidgetListener
         requestStack $requestStack,
         HttpKernelInterface $httpKernel,
         FormFactory $formFactory,
-        TwigEngine $templating
+        TwigEngine $templating,
+        UserwidgetManager $userwidgetManager
     )
     {
         $this->container = $container;
@@ -71,24 +79,25 @@ class UserwidgetListener
         $this->request = $requestStack->getCurrentRequest();
         $this->templating = $templating;
         $this->formFactory = $formFactory;
+        $this->userwidgetManager = $userwidgetManager;
     }
     /*
      * Listener to the widget display
      */
     /**
      * @DI\Observe("widget_simusante_user_widget")
-     *
      * @param DisplayWidgetEvent $event
      */
     public function onDisplay(DisplayWidgetEvent $event)
     {
-//        $widgetInstance = $event->getInstance();
+        $config = $this->userwidgetManager->getConfig($event->getInstance());
         $params = array();
         $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:displayUser';
-//        $params['widgetInstance'] = $widgetInstance->getId();
+        $params['config'] = $config;
         $this->redirect($params, $event);
     }
-    /*
+
+    /**
      * call to controller method. Send param & event
      */
     private function redirect($params, $event)
@@ -112,10 +121,9 @@ class UserwidgetListener
     {
         //retrieve the instance of the event
         $instance = $event->getInstance();
-        //
-       // $config = $this->rssManager->getConfig($instance);
-
-        $config = null;
+        //get the config for the widget
+        $config = $this->userwidgetManager->getConfig($instance);
+        //set default configuration
         if ($config === null) {
             $config = new Config();
         }

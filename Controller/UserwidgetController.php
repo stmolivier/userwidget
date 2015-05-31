@@ -17,19 +17,19 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class UserwidgetController extends Controller
 {
-    /*
+    /**
      * Object manager
      */
     private $om;
-    /*
+    /**
      * User repository, retrieved from the core, through the OM
      */
     private $userRepo;
-    /*
+    /**
      * Role repository, retrieved from the core, through the OM
      */
     private $roleRepo;  //necessary to retrieve the role with right format
-    /*
+    /**
      * Workspace repository, retrieved from the core, through the OM
      */
     private $wsRepo;
@@ -52,7 +52,7 @@ class UserwidgetController extends Controller
         $this->wsRepo            = $om->getRepository('ClarolineCoreBundle:Workspace\Workspace');//$om->getRepository(Entity)
     }
 
-    /*
+    /**
      * action called by the onDisplay method in the Listener
      */
     /**
@@ -72,11 +72,12 @@ class UserwidgetController extends Controller
         //Get user array from query
         $users = $this->userRepo->findUsersByWorkspace(array($workspace));
         //template rendering
-        return $this->render('SimusanteUserwidgetBundle::toto.html.twig', array('users'=> $users));
+        return $this->render('SimusanteUserwidgetBundle::userwidget.html.twig', array('users'=> $users));
     }
 
-    /*
+    /**
      * action called by the onConfigure method in the Listener for form POST
+     * AJAX response
      */
     /**
      * @EXT\Route(
@@ -87,17 +88,18 @@ class UserwidgetController extends Controller
      */
     public function configureUserwidget(WidgetInstance $widget)
     {
+        //Authorization to access this widget config
         if (!$this->get('security.authorization_checker')->isGranted('edit', $widget)) {
             throw new AccessDeniedException();
         }
-/*
-        $rssConfig = $this->get('claroline.manager.rss_manager')->getConfig($widget);
+
+        $userwidgetConfig = $this->get('simusante.manager.user_widget')->getConfig($widget);
         $form = $this->container->get('form.factory')->create(new ConfigType, new Config());
         $form->bind($this->getRequest());
 
-        if ($rssConfig) {
+        if ($userwidgetConfig) {
             if ($form->isValid()) {
-                $rssConfig->setUrl($form->get('url')->getData());
+                $userwidgetConfig->setWorkspace($form->get('workspace')->getData());
             } else {
                 return $this->render(
                     'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
@@ -110,9 +112,9 @@ class UserwidgetController extends Controller
             }
         } else {
             if ($form->isValid()) {
-                $rssConfig = new Config();
-                $rssConfig->setWidgetInstance($widget);
-                $rssConfig->setUrl($form->get('url')->getData());
+                $userwidgetConfig = new Config();
+                $userwidgetConfig->setWidgetInstance($widget);
+                $userwidgetConfig->setWorkspace($form->get('workspace')->getData());
             } else {
                 return $this->render(
                     'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
@@ -126,9 +128,9 @@ class UserwidgetController extends Controller
         }
 
         $em = $this->get('doctrine.orm.entity_manager');
-        $em->persist($rssConfig);
+        $em->persist($userwidgetConfig);
         $em->flush();
-*/
+
         return new Response('', 204);
     }
 }
