@@ -3,13 +3,18 @@
 namespace Simusante\UserwidgetBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Claroline\CoreBundle\Entity\Widget\WidgetInstance;
+use Claroline\CoreBundle\Manager\UserManager;
+use JMS\DiExtraBundle\Annotation as DI;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Simusante\UserwidgetBundle\Form\ConfigType;
+use Simusante\UserwidgetBundle\Library\UserwidgetManager;
 use Simusante\UserwidgetBundle\Entity\Config;
-use Claroline\CoreBundle\Entity\Widget\WidgetInstance;
-use JMS\DiExtraBundle\Annotation as DI;
+
+use Symfony\Component\Form\FormFactory;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * userwidget controller.
@@ -21,116 +26,154 @@ class UserwidgetController extends Controller
      * Object manager
      */
     private $om;
-    /**
-     * User repository, retrieved from the core, through the OM
-     */
-    private $userRepo;
+
     /**
      * Role repository, retrieved from the core, through the OM
      */
     private $roleRepo;  //necessary to retrieve the role with right format
+
     /**
-     * Workspace repository, retrieved from the core, through the OM
+     * @var
      */
-    private $wsRepo;
+    private $formFactory;
+    /**
+     * manager for the widget
+     * @var
+     */
+    private $userwidgetManager;
+    private $userManager;
+
     /**
      * @DI\InjectParams({
-     *      "om"                 = @DI\Inject("claroline.persistence.object_manager")
+     *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
+     *     "formFactory"     = @DI\Inject("form.factory"),
+     *      "userwidgetManager"  = @DI\Inject("simusante.manager.user_widget")
+     *      "userManager"  = @DI\Service("claroline.manager.user_manager")
      * })
      */
     public function __construct(
-        ObjectManager $om
+        ObjectManager $om,
+        FormFactory $formFactory,
+        UserwidgetManager $userwidgetManager,
+        UserManager $userManager
     )
     {
         //Object manager initialization
-        $this->om                 = $om;
-        //user repo access
-        $this->userRepo           = $om->getRepository('ClarolineCoreBundle:User');
+        $this->om                = $om;
         //role repo access
-        $this->roleRepo           = $om->getRepository('ClarolineCoreBundle:Role');
-        //ws repo access
-        $this->wsRepo            = $om->getRepository('ClarolineCoreBundle:Workspace\Workspace');//$om->getRepository(Entity)
+        //$this->roleRepo           = $om->getRepository('ClarolineCoreBundle:Role');
+        //user repo access
+        $this->userManager       = $userManager;
+        $this->formFactory       = $formFactory;
+        //
+        $this->userwidgetManager = $userwidgetManager;
     }
 
-    /**
-     * action called by the onDisplay method in the Listener
-     */
-    /**
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function displayUserAction()
-    {
-        /*
-        //Get a Role object
-        $role = $this->roleRepo->findOneByName('ROLE_WS_CREATOR');
-        //Get the list of users with the role $role
-        $users = $this->userRepo->findByRoles(array($role));
-        */
-        $workspace = $this->wsRepo->findOneByCode('ea1');
-      /*  var_dump($workspace);
-        die();*/
-        //Get user array from query
-        $users = $this->userRepo->findUsersByWorkspace(array($workspace));
-        //template rendering
-        return $this->render('SimusanteUserwidgetBundle::userwidget.html.twig', array('users'=> $users));
-    }
+    /******************
+     * Widget methods *
+     ******************/
 
     /**
-     * action called by the onConfigure method in the Listener for form POST
-     * AJAX response
+     * called on onDisplay Listener method
+     * call the userwidgetDisplay.html.twig, which calls the dynamic list generator twig file userwidgetList.html.twig
      */
     /**
      * @EXT\Route(
-     *     "/simple_text_update/config/{widget}",
-     *     name="simusante_userwidget_config_update"
+     *     "/userwidget/widget/{widgetInstance}",
+     *     name="simusante_userwidget",
+     *     options={"expose"=true}
      * )
-     * @EXT\Method("POST")
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userwidgetDisplay.html.twig")
      */
-    public function configureUserwidget(WidgetInstance $widget)
+    public function displayUserwidgetAction(WidgetInstance $widgetInstance)
     {
-        //Authorization to access this widget config
-        if (!$this->get('security.authorization_checker')->isGranted('edit', $widget)) {
-            throw new AccessDeniedException();
-        }
+        return array('widgetInstance' => $widgetInstance);
+      /*  //Get a Role object
+        $role = $this->roleRepo->findOneByName('ROLE_WS_CREATOR');
+        //Get the list of users with the role $role
+        $users = $this->userRepo->findByRoles(array($role));
 
-        $userwidgetConfig = $this->get('simusante.manager.user_widget')->getConfig($widget);
-        $form = $this->container->get('form.factory')->create(new ConfigType, new Config());
-        $form->bind($this->getRequest());
-
-        if ($userwidgetConfig) {
-            if ($form->isValid()) {
-                $userwidgetConfig->setWorkspace($form->get('workspace')->getData());
-            } else {
-                return $this->render(
-                    'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
-                    array(
-                        'form' => $form->createView(),
-                        'isAdmin' => $widget->isAdmin(),
-                        'config' => $widget
-                    )
-                );
-            }
+        $workspace = $this->wsRepo->findOneByCode('ea1');
+        //Get user array from query
+        $users = $this->userRepo->findUsersByWorkspace(array($workspace));
+        //template rendering
+        return $this->render('SimusanteUserwidgetBundle:Widget:userwidgetDisplay.html.twig', array('users'=> $users));*/
+    }
+    /**
+     * List of users from workspace
+     * @param string  $search
+     * @param integer $page
+     * @param integer $max
+     * @param string  $orderedBy
+     *
+     */
+    /**
+     * @EXT\Route(
+     *     "/userwidget/{widgetInstance}/page/{page}/max/{max}/ordered/by/{orderedBy}/order/{order}/search/{search}",
+     *     name="simusante_userwidget_list",
+     *     defaults={"page"=1, "search"="", "max"=20, "orderedBy"="title","order"="ASC"},
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userwidgetList.html.twig")
+     */
+    public function userwidgetListAction(
+        WidgetInstance $widgetInstance,
+        $search = '',
+        $page = 1,
+        $max = 20,
+        $orderedBy = 'id',
+        $order = 'ASC'
+    )
+    {
+        //retrieve widget config
+        $config = $this->userwidgetManager->getUserwidgetConfiguration($widgetInstance);
+        $configWorkspace = $config->getWorkspace();
+        //if no ws is selected
+        if (is_null($configWorkspace)) {
+            //retrieve all users
+            $users = $this->userManager->getAllUsers($page, $max, $orderedBy, $order);
         } else {
-            if ($form->isValid()) {
-                $userwidgetConfig = new Config();
-                $userwidgetConfig->setWidgetInstance($widget);
-                $userwidgetConfig->setWorkspace($form->get('workspace')->getData());
-            } else {
-                return $this->render(
-                    'SimusanteUserwidgetBundle::widgetformconfiguration.html.twig',
-                    array(
-                        'form' => $form->createView(),
-                        'isAdmin' => $widget->isAdmin(),
-                        'config' => $widget
-                    )
-                );
-            }
+            //retrieve users from the selected ws
+            $users = $this->userManager->getUsersByWorkspaces(array($configWorkspace), $page, $max, $withPager);
         }
+        return array(
+            'widgetInstance' => $widgetInstance,
+            'users' => $users,
+            'search' => $search,
+            'page' => $page,
+            'max' => $max,
+            'orderedBy' => $orderedBy,
+            'order' => $order
+        );
+    }
 
-        $em = $this->get('doctrine.orm.entity_manager');
-        $em->persist($userwidgetConfig);
-        $em->flush();
+    /**
+     * called on onConfigure Listener method for form POST
+     * returns AJAX response
+     */
+    /**
+     * @EXT\Route(
+     *     "/userwidget/widget/{widgetInstance}/configure/form",
+     *     name="simusante_userwidget_configure_form",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userWidgetConfigureForm.html.twig")
+     */
+    public function configureUserwidgetAction(WidgetInstance $widgetInstance)
+    {
+        $config = $this->userwidgetManager->getUserwidgetConfig($widgetInstance);
 
-        return new Response('', 204);
+        $form = $this->formFactory->create(
+            new UserwidgetConfigType(),
+            $config
+        );
+
+        return array(
+            'form' => $form->createView(),
+            'config' => $config
+        );
     }
 }

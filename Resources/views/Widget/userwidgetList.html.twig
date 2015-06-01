@@ -1,0 +1,61 @@
+{% if userlist|length > 0 %}
+
+    <div class="panel-group" role="tablist">
+
+        {% for user in userlist %}
+            {% set userId = user.getId() %}
+            {% set icon = user.getIcon() %}
+
+            {% if icon is empty %}
+                {% set iconPath = asset('bundles/userwidget/images/no_icon.png') %}
+            {% else %}
+                {% set iconPath = asset('files/userwidgetbundle/icons/' ~ user.getIcon()) %}
+            {% endif %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <span data-toggle="collapse"
+                              href="#user-content-{{ userId }}"
+                              class="pointer-hand"
+                                >
+                            {{ workspace.getName() }}
+                        </span>
+                    </h3>
+                </div>
+                <div id="user-content-{{ userId }}" class="panel-collapse collapse">
+                    <div class="panel-body">
+
+                        <div class="media">
+                            <div class="media-left col-md-2 text-center">
+                                <img class="media-object"
+                                     src="{{ iconPath }}"
+                                     alt=""
+                                     width="150px"
+                                        >
+                            </div>
+                            <div class="media-body col-md-10">
+                                <div>
+                                    USERLIST
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% else %}
+    <div class="alert alert-warning">
+        {{ 'no_user'|trans({}, 'cursus') }}
+    </div>
+{% endif %}
+
+<div id="userwidget-datas-box"
+     data-search="{{ search }}"
+     data-max="{{ max }}"
+     data-ordered-by="{{ orderedBy }}"
+     data-order="{{ order }}"
+     data-widget-instance-id="{{ widgetInstance.getId() }}"
+        >
+</div>

@@ -1,0 +1,18 @@
+<div id="user-widget">
+    <div id="user-list">
+        {{
+        render(controller(
+        'SimusanteUserwidgetBundle:Widget:userwidgetList',
+        {'widgetInstance': widgetInstance.getId()}
+        ))
+        }}
+    </div>
+</div>
+{#
+LISTE DES UTILISATEURS
+<ul>
+{% for user in users %}
+    <li>{{ user.firstName }}</li>
+{% endfor %}
+</ul>
+#}

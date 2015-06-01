@@ -3,15 +3,14 @@
 namespace Simusante\UserwidgetBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Claroline\CoreBundle\Entity\Widget\WidgetInstance;
 
 /**
- * Config
+ * UserwidgetConfig
  *
- * @ORM\Table(name="simusante_userwidget_configuration")
+ * @ORM\Table(name="simusante_userwidget_config")
  * @ORM\Entity
  */
-class Config
+class UserwidgetConfig
 {
     /**
      * @var integer
@@ -25,12 +24,11 @@ class Config
     /**
      * @var string
      *
-     * @ORM\Column(name="workspace", type="text")
+     * @ORM\Column(name="workspace", type="string", length=255)
      */
     private $workspace;
-
     /**
-     * @ORM\ManyToOne(targetEntity="Claroline\CoreBundle\Entity\Widget\WidgetInstance")
+     * @ORM\OneToOne(targetEntity="Claroline\CoreBundle\Entity\Widget\WidgetInstance")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
     protected $widgetInstance;
@@ -50,7 +48,7 @@ class Config
      *
      * @param string $workspace
      *
-     * @return Config
+     * @return UserwidgetConfig
      */
     public function setWorkspace($workspace)
     {
@@ -74,7 +72,7 @@ class Config
      *
      * @param \Claroline\CoreBundle\Entity\Widget\WidgetInstance $widgetInstance
      *
-     * @return Config
+     * @return UserwidgetConfig
      */
     public function setWidgetInstance(\Claroline\CoreBundle\Entity\Widget\WidgetInstance $widgetInstance = null)
     {
