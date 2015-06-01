@@ -8,11 +8,12 @@ use Claroline\CoreBundle\Manager\UserManager;
 use JMS\DiExtraBundle\Annotation as DI;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Claroline\CoreBundle\Persistence\ObjectManager;
-use Simusante\UserwidgetBundle\Form\ConfigType;
-use Simusante\UserwidgetBundle\Library\UserwidgetManager;
-use Simusante\UserwidgetBundle\Entity\Config;
+use Simusante\UserwidgetBundle\Form\UserwidgetConfigType;
+use Simusante\UserwidgetBundle\Manager\UserwidgetManager;
+use Simusante\UserwidgetBundle\Entity\UserwidgetConfig;
 
 use Symfony\Component\Form\FormFactory;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -42,20 +43,22 @@ class UserwidgetController extends Controller
      */
     private $userwidgetManager;
     private $userManager;
-
+    private $request;
     /**
      * @DI\InjectParams({
-     *      "om"                 = @DI\Inject("claroline.persistence.object_manager"),
-     *     "formFactory"     = @DI\Inject("form.factory"),
-     *      "userwidgetManager"  = @DI\Inject("simusante.manager.user_widget")
-     *      "userManager"  = @DI\Service("claroline.manager.user_manager")
+     *      "om"                    = @DI\Inject("claroline.persistence.object_manager"),
+     *     "formFactory"            = @DI\Inject("form.factory"),
+     *      "userwidgetManager"     = @DI\Inject("simusante.manager.userwidget"),
+     *      "userManager"           = @DI\Inject("claroline.manager.user_manager"),
+     *      "requestStack"          = @DI\Inject("request_stack"),
      * })
      */
     public function __construct(
         ObjectManager $om,
         FormFactory $formFactory,
         UserwidgetManager $userwidgetManager,
-        UserManager $userManager
+        UserManager $userManager,
+        RequestStack $requestStack
     )
     {
         //Object manager initialization
@@ -67,6 +70,7 @@ class UserwidgetController extends Controller
         $this->formFactory       = $formFactory;
         //
         $this->userwidgetManager = $userwidgetManager;
+        $this->request = $requestStack->getCurrentRequest();
     }
 
     /******************
@@ -83,10 +87,9 @@ class UserwidgetController extends Controller
      *     name="simusante_userwidget",
      *     options={"expose"=true}
      * )
-     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
      * @EXT\Template("SimusanteUserwidgetBundle:Widget:userwidgetDisplay.html.twig")
      */
-    public function displayUserwidgetAction(WidgetInstance $widgetInstance)
+    public function userwidgetDisplayAction(WidgetInstance $widgetInstance)
     {
         return array('widgetInstance' => $widgetInstance);
       /*  //Get a Role object
@@ -124,11 +127,12 @@ class UserwidgetController extends Controller
         $page = 1,
         $max = 20,
         $orderedBy = 'id',
-        $order = 'ASC'
+        $order = 'ASC',
+        $withPager = true
     )
     {
         //retrieve widget config
-        $config = $this->userwidgetManager->getUserwidgetConfiguration($widgetInstance);
+        $config = $this->userwidgetManager->getUserwidgetConfig($widgetInstance);
         $configWorkspace = $config->getWorkspace();
         //if no ws is selected
         if (is_null($configWorkspace)) {
@@ -160,9 +164,9 @@ class UserwidgetController extends Controller
      *     options={"expose"=true}
      * )
      * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
-     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userWidgetConfigureForm.html.twig")
+     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userwidgetConfigureForm.html.twig")
      */
-    public function configureUserwidgetAction(WidgetInstance $widgetInstance)
+    public function userwidgetConfigureFormAction(WidgetInstance $widgetInstance)
     {
         $config = $this->userwidgetManager->getUserwidgetConfig($widgetInstance);
 
@@ -175,5 +179,37 @@ class UserwidgetController extends Controller
             'form' => $form->createView(),
             'config' => $config
         );
+    }
+    /**
+     * Ajax response to the configuration form post
+     */
+    /**
+     * @EXT\Route(
+     *     "/userwidget/widget/configure/config/{config}",
+     *     name="simusante_userwidget_configure",
+     *     options={"expose"=true}
+     * )
+     * @EXT\ParamConverter("authenticatedUser", options={"authenticatedUser" = true})
+     * @EXT\Template("SimusanteUserwidgetBundle:Widget:userwidgetConfigureForm.html.twig")
+     */
+    public function userwidgetConfigureAction(UserwidgetConfig $config)
+    {
+        $form = $this->formFactory->create(
+            new UserwidgetConfigType(),
+            $config
+        );
+        $form->handleRequest($this->request);
+
+        if ($form->isValid()) {
+            $this->userwidgetManager->persistUserwidgetConfiguration($config);
+
+            return new JsonResponse('success', 204);
+        } else {
+
+            return array(
+                'form' => $form->createView(),
+                'config' => $config
+            );
+        }
     }
 }

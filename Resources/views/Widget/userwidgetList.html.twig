@@ -1,8 +1,50 @@
-{% if userlist|length > 0 %}
+{% macro renderPager(pager, widgetInstanceId, search, max, orderedBy, order) %}
+    {% if search is empty %}
+        {{
+        pagerfanta(
+        pager,
+        'twitter_bootstrap_translated',
+        {
+            'proximity' : 1,
+            'routeName': 'simusante_userwidget_list',
+            'routeParams': {
+            'widgetInstance': widgetInstanceId,
+            'max': max,
+            'orderedBy': orderedBy,
+            'order': order
+        }
+        }
+        )
+        }}
+    {% else %}
+        {{
+        pagerfanta(
+        pager,
+        'twitter_bootstrap_translated',
+        {
+            'proximity' : 1,
+            'routeName': 'simusante_userwidget_list',
+            'routeParams': {
+            'widgetInstance': widgetInstanceId,
+            'search': search,
+            'max': max,
+            'orderedBy': orderedBy,
+            'order': order
+        }
+        }
+        )
+        }}
+    {% endif %}
+{% endmacro %}
+
+{% from _self import renderPager %}
+{% from "ClarolineCoreBundle::macros.html.twig" import maxResultsSelectBox %}
+
+{% if users|length > 0 %}
 
     <div class="panel-group" role="tablist">
 
-        {% for user in userlist %}
+        {% for user in users %}
             {% set userId = user.getId() %}
             {% set icon = user.getIcon() %}
 
@@ -47,7 +89,7 @@
 
 {% else %}
     <div class="alert alert-warning">
-        {{ 'no_user'|trans({}, 'cursus') }}
+        {{ 'no_user'|trans({}, 'userwidget') }}
     </div>
 {% endif %}
 

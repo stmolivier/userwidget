@@ -1,6 +1,6 @@
 {% form_theme form 'ClarolineCoreBundle::form_theme.html.twig' %}
 <form class="form-horizontal" id="user-widget-form"
-      action="{{ path('simusante_userwidget_config_update', {'widget': config.getId()}) }} "
+      action="{{ path('simusante_userwidget_configure', {'config': config.getId()}) }} "
       method="post" {{ form_enctype(form) }}
         >
     <div class="panel-body">

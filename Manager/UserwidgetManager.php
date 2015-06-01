@@ -10,12 +10,8 @@ use Simusante\UserwidgetBundle\Entity\UserwidgetConfig;
 /**
  * @DI\Service("simusante.manager.userwidget")
  */
-class CursusManager
+class UserwidgetManager
 {
-    /**
-     * @var object widget instance
-     */
-    private $widgetInstance;
     /**
      * @var object object manager
      */
@@ -24,6 +20,7 @@ class CursusManager
      * @DI\InjectParams({
      * "om" = @DI\Inject("claroline.persistence.object_manager"),
      * })
+     * @param ObjectManager $om
      */
     public function __construct(
         ObjectManager $om
@@ -33,9 +30,10 @@ class CursusManager
     }
 
     /**
-     *
+     * @param WidgetInstance $widgetInstance
+     * @return object|UserwidgetConfig
      */
-    public getUserwidgetConfiguration(WidgetInstance $widgetInstance)
+    public function getUserwidgetConfig(WidgetInstance $widgetInstance)
     {
         $config = $this->userWidgetConfigRepo->findOneBy(
             array('widgetInstance' => $widgetInstance->getId())

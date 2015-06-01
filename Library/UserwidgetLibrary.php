@@ -11,9 +11,9 @@ use Simusante\UserwidgetBundle\Entity\UserwidgetConfig;
  * Definition of the service
  */
 /**
- * @DI\Service("simusante.manager.user_widget")
+ * @DI\Service("simusante.manager.userwidgetlib")
  */
-class UserwidgetManager
+class UserwidgetLibrary
 {
     private $om;
     /**

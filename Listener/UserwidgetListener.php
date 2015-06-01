@@ -55,7 +55,7 @@ class UserwidgetListener
     {
         $widgetInstance = $event->getInstance();
         $params = array();
-        $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:displayUserwidget';
+        $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:userwidgetDisplay';
         $params['widgetInstance'] = $widgetInstance->getId();
         $this->redirect($params, $event);
     }
@@ -70,7 +70,7 @@ class UserwidgetListener
     {
         $widgetInstance = $event->getInstance();
         $params = array();
-        $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:configureUserwidget';
+        $params['_controller'] = 'SimusanteUserwidgetBundle:Userwidget:userwidgetConfigureForm';
         $params['widgetInstance'] = $widgetInstance->getId();
         $this->redirect($params, $event);
     }
