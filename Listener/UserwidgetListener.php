@@ -65,6 +65,7 @@ class UserwidgetListener
      */
     /**
      * @DI\Observe("widget_simusante_user_widget_configuration")
+     * @param ConfigureWidgetEvent $event
      */
     public function onConfigure(ConfigureWidgetEvent $event)
     {
@@ -77,6 +78,8 @@ class UserwidgetListener
 
     /**
      * call to controller method. Send param & event
+     * @param $params
+     * @param $event
      */
     private function redirect($params, $event)
     {

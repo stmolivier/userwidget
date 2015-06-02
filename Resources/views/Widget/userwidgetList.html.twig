@@ -46,12 +46,12 @@
 
         {% for user in users %}
             {% set userId = user.getId() %}
-            {% set icon = user.getIcon() %}
+            {% set icon = user.getPicture() %}
 
             {% if icon is empty %}
-                {% set iconPath = asset('bundles/userwidget/images/no_icon.png') %}
+                {% set iconPath = asset('bundles/simusanteuserwidget/images/no_icon.png') %}
             {% else %}
-                {% set iconPath = asset('files/userwidgetbundle/icons/' ~ user.getIcon()) %}
+                {% set iconPath = asset('files/simusanteuserwidgetbundle/icons/' ~ icon) %}
             {% endif %}
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -60,27 +60,14 @@
                               href="#user-content-{{ userId }}"
                               class="pointer-hand"
                                 >
-                            {{ workspace.getName() }}
+                            {{ user.getFirstName() }} {{ user.getLastName() }}
                         </span>
                     </h3>
                 </div>
                 <div id="user-content-{{ userId }}" class="panel-collapse collapse">
                     <div class="panel-body">
-
-                        <div class="media">
-                            <div class="media-left col-md-2 text-center">
-                                <img class="media-object"
-                                     src="{{ iconPath }}"
-                                     alt=""
-                                     width="150px"
-                                        >
-                            </div>
-                            <div class="media-body col-md-10">
-                                <div>
-                                    USERLIST
-                                </div>
-                            </div>
-                        </div>
+                        {% include 'ClarolineCoreBundle:Profile:publicProfileGeneralTab.html.twig'
+                        with {'user': user, 'publicProfilePreferences': publicProfilePreferences, 'links' : {} } %}
                     </div>
                 </div>
             </div>

@@ -26,6 +26,7 @@ class UserwidgetManager
         ObjectManager $om
     )
     {
+        $this->om = $om;
         $this->userWidgetConfigRepo = $om->getRepository('SimusanteUserwidgetBundle:UserwidgetConfig');
     }
 
@@ -38,11 +39,14 @@ class UserwidgetManager
         $config = $this->userWidgetConfigRepo->findOneBy(
             array('widgetInstance' => $widgetInstance->getId())
         );
+
         //Create a default config
         if (is_null($config)) {
             $config = new UserwidgetConfig();
             $config->setWidgetInstance($widgetInstance);
-            $this->persistUserwidgetConfiguration($config);
+            // TODO : improve this
+            $config->setWorkspace(0);
+            $this->persistUserwidgetConfig($config);
         }
 
         return $config;
@@ -51,9 +55,8 @@ class UserwidgetManager
      * Save the widget configuration
      *
      * @param UserwidgetConfig $config
-     * @see persistUserwidgetConfiguration
      */
-    public function persistUserwidgetConfiguration(UserwidgetConfig $config)
+    public function persistUserwidgetConfig(UserwidgetConfig $config)
     {
         $this->om->persist($config);
         $this->om->flush();

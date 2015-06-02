@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as EXT;
 use Claroline\CoreBundle\Persistence\ObjectManager;
 use Simusante\UserwidgetBundle\Form\UserwidgetConfigType;
 use Simusante\UserwidgetBundle\Manager\UserwidgetManager;
+use Claroline\CoreBundle\Manager\FacetManager;
 use Simusante\UserwidgetBundle\Entity\UserwidgetConfig;
 
 use Symfony\Component\Form\FormFactory;
@@ -44,6 +45,7 @@ class UserwidgetController extends Controller
     private $userwidgetManager;
     private $userManager;
     private $request;
+    private $facetManager;
     /**
      * @DI\InjectParams({
      *      "om"                    = @DI\Inject("claroline.persistence.object_manager"),
@@ -51,6 +53,7 @@ class UserwidgetController extends Controller
      *      "userwidgetManager"     = @DI\Inject("simusante.manager.userwidget"),
      *      "userManager"           = @DI\Inject("claroline.manager.user_manager"),
      *      "requestStack"          = @DI\Inject("request_stack"),
+     *     "facetManager"           = @DI\Inject("claroline.manager.facet_manager"),
      * })
      */
     public function __construct(
@@ -58,6 +61,7 @@ class UserwidgetController extends Controller
         FormFactory $formFactory,
         UserwidgetManager $userwidgetManager,
         UserManager $userManager,
+        FacetManager $facetManager,
         RequestStack $requestStack
     )
     {
@@ -68,7 +72,7 @@ class UserwidgetController extends Controller
         //user repo access
         $this->userManager       = $userManager;
         $this->formFactory       = $formFactory;
-        //
+        $this->facetManager = $facetManager;
         $this->userwidgetManager = $userwidgetManager;
         $this->request = $requestStack->getCurrentRequest();
     }
@@ -109,7 +113,7 @@ class UserwidgetController extends Controller
      * @param integer $page
      * @param integer $max
      * @param string  $orderedBy
-     *
+     * @return array
      */
     /**
      * @EXT\Route(
@@ -131,31 +135,37 @@ class UserwidgetController extends Controller
         $withPager = true
     )
     {
-        //retrieve widget config
+        //retrieve this widget config
         $config = $this->userwidgetManager->getUserwidgetConfig($widgetInstance);
-        $configWorkspace = $config->getWorkspace();
+
+        $publicProfilePreferences = $this->facetManager->getVisiblePublicPreference();
+
         //if no ws is selected
-        if (is_null($configWorkspace)) {
+        if (is_null($config)) {
             //retrieve all users
             $users = $this->userManager->getAllUsers($page, $max, $orderedBy, $order);
         } else {
+            $configWorkspace = $config->getWorkspace();
             //retrieve users from the selected ws
             $users = $this->userManager->getUsersByWorkspaces(array($configWorkspace), $page, $max, $withPager);
         }
+
         return array(
-            'widgetInstance' => $widgetInstance,
-            'users' => $users,
-            'search' => $search,
-            'page' => $page,
-            'max' => $max,
-            'orderedBy' => $orderedBy,
-            'order' => $order
+            'widgetInstance'            => $widgetInstance,
+            'users'                     => $users,
+            'search'                    => $search,
+            'page'                      => $page,
+            'max'                       => $max,
+            'orderedBy'                 => $orderedBy,
+            'order'                     => $order,
+            'publicProfilePreferences'  => $publicProfilePreferences
         );
     }
 
     /**
-     * called on onConfigure Listener method for form POST
-     * returns AJAX response
+     * Called on onConfigure Listener method for form POST
+     * @param WidgetInstance $widgetInstance
+     * @return array    AJAX response
      */
     /**
      * @EXT\Route(
@@ -182,6 +192,8 @@ class UserwidgetController extends Controller
     }
     /**
      * Ajax response to the configuration form post
+     * @param UserwidgetConfig $config
+     * @return array|JsonResponse
      */
     /**
      * @EXT\Route(
