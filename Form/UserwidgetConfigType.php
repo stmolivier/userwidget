@@ -16,20 +16,13 @@ class UserwidgetConfigType extends AbstractType
     {
         $builder
             ->add(
-                'workspace', 'text'
-                /*'entity',
+                'workspace',
+                'entity',
                 array(
-                    'class' => 'ClarolineCursusBundle:Cursus',
-                    'query_builder' => function (EntityRepository $er) {
-
-                        return $er->createQueryBuilder('c')
-                            ->where('c.course IS NULL')
-                            ->orderBy('c.title', 'ASC');
-                    },
-                    'property' => 'titleAndCode',
-                    'required' => false,
-                    'label' => 'cursus'
-                )*/
+                    'class' => 'ClarolineCoreBundle:Workspace\Workspace',
+                    'property' => 'name',
+                    'required' => true
+                )
             )
         ;
     }

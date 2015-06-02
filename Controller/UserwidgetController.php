@@ -213,7 +213,7 @@ class UserwidgetController extends Controller
         $form->handleRequest($this->request);
 
         if ($form->isValid()) {
-            $this->userwidgetManager->persistUserwidgetConfiguration($config);
+            $this->userwidgetManager->persistUserwidgetConfig($config);
 
             return new JsonResponse('success', 204);
         } else {

@@ -22,9 +22,8 @@ class UserwidgetConfig
     private $id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="workspace", type="string", length=255)
+     * @ORM\ManyToOne(targetEntity="Claroline\CoreBundle\Entity\Workspace\Workspace")
+     * @ORM\JoinColumn(name="workspace", nullable=true, onDelete="SET NULL")
      */
     private $workspace;
     /**
