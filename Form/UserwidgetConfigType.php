@@ -2,9 +2,14 @@
 
 namespace Simusante\UserwidgetBundle\Form;
 
+use Claroline\CoreBundle\Entity\User;
+use Claroline\CoreBundle\Repository\WorkspaceRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Doctrine\ORM\EntityRepository;
+
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class UserwidgetConfigType extends AbstractType
 {
@@ -14,19 +19,28 @@ class UserwidgetConfigType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add(
-                'workspace',
-                'entity',
+       /* $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function(FormEvent $event) use ($user) {
+
+            }
+        );*/
+        $builder->add(
+            'workspace',
+            'entity',   //to have a listbox of entity items
                 array(
                     'class' => 'ClarolineCoreBundle:Workspace\Workspace',
+                    'query_builder' => function(WorkspaceRepository $wr) {
+                        return $wr->createQueryBuilder('w')
+                            ->where('w.isPersonal = 0');
+                    },
                     'property' => 'name',
                     'required' => true
                 )
-            )
+        )
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

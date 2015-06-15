@@ -1,5 +1,4 @@
-*README
-
+*README*
 
 Todo :
 - install/update table on plugin install/update

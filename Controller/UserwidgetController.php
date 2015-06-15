@@ -96,16 +96,6 @@ class UserwidgetController extends Controller
     public function userwidgetDisplayAction(WidgetInstance $widgetInstance)
     {
         return array('widgetInstance' => $widgetInstance);
-      /*  //Get a Role object
-        $role = $this->roleRepo->findOneByName('ROLE_WS_CREATOR');
-        //Get the list of users with the role $role
-        $users = $this->userRepo->findByRoles(array($role));
-
-        $workspace = $this->wsRepo->findOneByCode('ea1');
-        //Get user array from query
-        $users = $this->userRepo->findUsersByWorkspace(array($workspace));
-        //template rendering
-        return $this->render('SimusanteUserwidgetBundle:Widget:userwidgetDisplay.html.twig', array('users'=> $users));*/
     }
     /**
      * List of users from workspace
@@ -206,6 +196,9 @@ class UserwidgetController extends Controller
      */
     public function userwidgetConfigureAction(UserwidgetConfig $config)
     {
+        $sessionFlashBag = $this->session->getFlashBag();
+        $sessionFlashBag->add('success', 'Un message');
+
         $form = $this->formFactory->create(
             new UserwidgetConfigType(),
             $config
